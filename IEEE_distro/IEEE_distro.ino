@@ -63,6 +63,30 @@ layer 1, half "b" (right half in the image) and so forth. This function uses the
 functions so you shouldn't need to use those functios directly. In this manner we can write animation 
 functions which simply have a collection of sequential "frames" 
 */
+
+/*
+ * We are doing things a little differently.
+ *
+ * uint16_t leds stores which leds will be on with the bits representing these LEDs:
+ * 0  1  2  3
+ * 4  5  6  7
+ * 8  9  10 11
+ * 12 13 14 15
+ *
+ * uint8_t level stores which level of LEDs will be lit up
+ * 0 = lowest
+ * 3 = highest. The 4 MSB will be ignored.
+ *
+ * void light_leds(uint16_t leds) will take the leds variable and map them to the
+ * correct leds on the board
+ *
+ * void light_level(uint8_t level) will take the level variable and map it to the 
+ * correct level of the board.
+ */
+uint16_t leds;
+uint8_t level;
+void light_leds(uint16_t);
+void light_level(uint8_t);
 ///////////////////////////////////////////////////////////////////////////////////
 
 
@@ -73,7 +97,7 @@ functions which simply have a collection of sequential "frames"
 //Set all of the pins we will be using to output mode to get maximum current
 void setup() 
 {
-  //Columns of the LED cube
+  // Every single pin of the board is an output
   pinMode(0,OUTPUT);
   pinMode(1,OUTPUT);
   pinMode(2,OUTPUT);
@@ -90,8 +114,6 @@ void setup()
   pinMode(13,OUTPUT);
   pinMode(A4,OUTPUT);
   pinMode(A5,OUTPUT);
-  
-  //Layers of the LED cube
   pinMode(A3,OUTPUT);
   pinMode(A2,OUTPUT);
   pinMode(A1,OUTPUT);
@@ -140,12 +162,44 @@ void fadeIn(int rate);
 ///////////////////////////////////////////////////////////////////////////////////
                           //MAIN LOOP FOR ANIMATIONS//
 ///////////////////////////////////////////////////////////////////////////////////
+void loop_through_leds(){
+  int i = 0;
+
+  while(i<8){
+    PORTB = 0x1 << i++;
+    delay(400);
+  }
+  PORTB = 0;
+  i = 0;
+  while(i<8){
+    PORTD = 0x1 << i++;
+    delay(800);
+  }
+  i = 0;
+}
+
 void loop() 
 {
-  PORTC = 0x1F;
-  PORTB = 0xFF;
-  PORTD = 0xFF;
+// top row on
+  PORTC = 0x1C;
+  loop_through_leds();
+  PORTC = 0x2C;
+  loop_through_leds();
+  PORTC = 0x34;
+  loop_through_leds();
+  PORTC = 0x38;
+  loop_through_leds();
+
+//  PORTB = 0xFF;
+//  PORTD = 0xFF;
   
+  
+
+
+
+
+
+ /* 
 //  //First Animation//
 //  for (int i = 0; i <1; i++)
 //  {
@@ -174,7 +228,7 @@ void loop()
 //    fadeIn(20);
 //  }
 //  delay(300);
-
+*/
 }
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -404,3 +458,4 @@ void line(int rate)
   frame(B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111110,B11111111,frame_duration);
   frame(B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,frame_duration*10);
 }
+
